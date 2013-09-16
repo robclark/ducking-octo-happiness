@@ -1,0 +1,379 @@
+#!/usr/bin/env pinpoint
+
+[bg.jpg][fill]
+[font=Sans 36px]
+[duration=5.000000]
+[shading-opacity=0.800000]
+[text-x=0.1]
+[text-y=0.1]
+[text-w=0.8]
+[text-h=0.8]
+-- [center][shading-opacity=0.70][duration=4.448699]
+<big>Open/Free SoC Graphics Update</big>
+<span font="24" letter_spacing="4096">2013 Sept - Rob Clark</span>
+
+--
+<big>History</big>
+
+  • a couple years ago, it looked hopeless
+  • but then libv drew some triangles
+  • we have come a long ways in the last year!
+
+  • etnaviv
+    • gallium driver for vivante
+
+  • lima
+    • classic/dri driver for mali 200/400
+
+  • grate
+    • gallium driver for tegra
+
+  • freedreno
+    • gallium driver for adreno 2xx/3xx
+    • plus xf86-video-freedreno and msm drm/kms
+
+-- [etnaviv/etnaviv-bg.png]
+<big>Etnaviv: Vivante</big>
+
+ • OpenGLES 2.0/3.0
+(XXX all hw supports 3.0?)
+
+ • OpenCL (GC2000)
+
+ • Unified shader ISA
+   • Vertex texture fetch
+
+ • 1x/2x/4x MSAA
+
+ • Tiled: 4x4 or 64x64
+   • No on-chip tile buffer
+   • Instead caches - need to be explicitly flushed
+   • Tiling handled in HW
+
+ • Formats
+   • Textures: 2D, cubemap
+   • Texture compression: DXT1-5, ETC
+   • Depth: 16b or 24b
+   • Stencil: 8b
+   • Index: 8b, 16b, or 32b
+
+ • Modular
+   • 3D, 2D, compositing, and VG engines, each optional
+   • But mostly talking about 3D and 2D
+
+-- [etnaviv/etnaviv-bg.png]
+<big>Etnaviv: Devices</big>
+
+ • SolidRun CuBox (GC800)
+   • Marvell Armada 510 SoC
+   • 800MHz dual-issue ARM PJ4
+   • 1GiB DDR3
+   • 1080p Video Decode Engine
+   • HDMI, gigabit ethernet, eSata, etc
+
+ • GK802 HDMI dongle (GC2000)
+
+ • GCW Zero (GC860)
+   • Ingenic JZ4770 1GHz MIPS processor
+   • 3.5" LCD (320x240)
+   • 512MiB DDR2
+   • mini-HDMI, A/V port, 802.11b/g/n
+
+-- [top][fit][etnaviv/gccore.png]
+Etnaviv: Hardware
+# NOTES ??
+
+-- [etnaviv/etnaviv-bg.png]
+<big>Etnaviv: Hardware</big>
+
+ • Unified Shader
+   • vec4 instructions
+     • scalar integer instructions on GC2000
+  • 128b instruction encoding
+
+<span font="monospace 24px">
+ ; gl_Position = modelviewprojectionMatrix * in_position
+ MUL t4, u0, t0.xxxx, void
+ MAD t4, u1, t0.yyyy, t4
+ MAD t4, u2, t0.zzzz, t4
+ MAD t4, u3, t0.wwww, t4
+</span>
+
+-- [etnaviv/etnaviv-bg.png]
+<big>Etnaviv: Status</big>
+
+ • Main Developer: Wladimir J. Van Der Laan (wumpus)
+
+ • IRC: #etnaviv (freenode)
+
+ • Working gallium driver
+   • But using fbdev backend only
+   • Needs help for xorg DDX, DRM/DRI2 support, etc
+
+ • Very fast progress
+   • r/e work started late 2012
+
+
+-- [top-left][fit][etnaviv/etnaviv-sequence.png]
+2013-07-21
+
+-- [top-right][fit][etnaviv/etnaviv-sequence.png]
+2013-07-27
+# fixed ??
+
+-- [bottom-left][fit][etnaviv/etnaviv-sequence.png]
+2013-08-16
+# fixed ??
+
+-- [bottom-right][fit][etnaviv/etnaviv-sequence.png]
+2013-08-28
+# fixed ??
+
+--
+<big>Lima: Mali 200/400/t6xx</big>
+
+ • Mali 200/400
+   • OpenGLES 2.0
+   • Separate Vertex (GP) and Fragment (PP) shaders
+   • Mali 400 available with 1-4x PP
+
+ • Mali t6xx
+   • OpenGLES 2.0 / 3.0
+   • OpenCL 1.1
+   • Unified Shader ISA
+   • Various # of shader cores and ALU widths
+
+-- 
+<big>Lima: Devices</big>
+
+ • Mali-t6xx
+   • Samsung Exynos4 (Chromebook, Nexus10)
+
+ • Mali-200/400
+   • AMLogic 8726-M (Zenithink C71)
+   • Allwinner A10 (Mele A1000, MK802)
+   • Samsung Exynos4 (Galaxy S2/S3/Tab/Note)
+   • Telechips 8902, 8803
+
+--
+<big>Lima: 200/400 Hardware</big>
+
+--
+<big>Lima: Status</big>
+
+ • Developers
+   • Luc Verhaegen (libv)
+   • Connor Abbot (cwabbot)
+   • Ben Brewer (flatmush)
+
+ • IRC: #lima (on freenode)
+
+ • Main Focus so far: Mali 200/400
+   • Mesa classic/dri driver starting to work
+     • es2gears, textured cube, etc
+   • Need to hook up cwabbot's compiler backend
+
+ • Some preliminary investigations on Mali t6xx compiler
+
+--
+<big>Grate: Tegra</big>
+
+ • OpenGLES 2.0
+
+ • Separate Vertex and Fragment shaders
+   • no loops, etc
+
+ • Non-tiled
+
+--
+<big>Grate: Devices</big>
+
+ • Tegra2
+   • AC-100
+   • Trimslice
+
+ • Tegra3
+   • Nexus7 (original)
+
+ • Tegra4
+   • ???
+
+--
+<big>Grate: Vertex Shader ISA</big>
+
+ • VLIW vec4 (ALU) + scalar (SFU) co-dispatch
+   • ALU: MOV, MUL, ADD, DP3, DP4, etc
+   • SFU: SIN, COS, RCP, RSQ, LG2, EX2
+
+<span font="monospace 24px">
+ ; gl_Position = modelviewprojectionMatrix * in_position
+ mul r1.xyzw, v0.xxxx, c0.xyzw
+ mad r1.xyzw, v0.yyyy, c1.xyzw, r1.xyzw
+ mad r1.xyzw, v0.zzzz, c2.xyzw, r1.xyzw
+ mad o0.xyzw, v0.wwww, c3.xyzw, r1.xyzw
+</span>
+
+--
+<big>Grate: Fragment Shader ISA</big>
+
+ • More weird, three different instruction streams
+   • VAR/SFU - varying interpolate and special function unit
+   • TEX - texture lookup
+   • ALU - arithmetic logic unit
+
+ • ALU - packets of 3/4 scalar instructions
+   • 3x 64b instructions + embedded constant
+   • or 4x 64b instructions
+   • only four opcodes:
+     • MAD: rD = rA * rB + rC
+     • MIN: rD = min(rA * rB, rC)
+     • MAX: rD = max(rA * rB, rC)
+     • CSEL: conditional select
+
+<span font="monospace 24px">
+ ; gl_FragColor = texture2D(tex, vec2(0.0));
+ ; gl_FragColor.r += gl_FragColor.a > 0.5 ? gl_FragColor.g : gl_FragColor.b;
+ ALU:002 mad r2.hl, #0, #1, #0
+ ALU:002 mad r3.hl, #0, #1, #0
+ TEX:002 tex s0
+ ALU:003 mad_lt r0.__, -r3.h, #1, ec0
+ ALU:004 cnd r1.hl, -x0_half, r3.l, r2.h
+ ALU:004 mad r2._l, d0.hl, #1, r2.l
+ EXP:004 export alu
+</span>
+
+--
+<big>Grate: Status</big>
+
+ • Main Developer: Erik Faye-Lund (kusma)
+
+ • IRC: #lima (on freenode)
+
+ • Early research stage
+   • command-stream capture and replay
+   • basic GL state understood
+   • main work is on fragment shader ISA currently
+   • basic gallium driver (clears)
+
+-- [freedreno/xonotic.png]
+<big>Freedreno: Adreno 2xx/3xx</big>
+
+ • Adreno 2xx
+   • OpenGLES 2.0
+   • Unified Shader ISA
+     • VLIW vec4 + scalar co-dispatch
+
+ • Adreno 3xx
+   • OpenGLES 2.0 / 3.0
+   • Unified Shader ISA
+     • explicitly pipelined scalar
+
+ • Common
+   • 1x/2x/4x MSAA
+   • Tiled: 256KiB-1MiB GMEM/OCMEM
+     • driver explicitly handles tiling (incl. restore/resolve)
+     • hw binning pass to avoid duplicated vertex processing
+
+-- [freedreno/xonotic.png]
+<big>Freedreno: Devices</big>
+
+ • Adreno 2xx
+   • Snapdragon S3 (HP TouchPad)
+   • Freescale iMX5 (Quickstart, Efika-MX)
+
+ • Adreno 3xx
+   • Snapdragon S4 Pro (Nexus4, ifc6410)
+   • Snapdragon-600 (Nexus7, Samsung Galaxy S4)
+   • Snapdragon-800 (LG G2, Sony Xperia Z Ultra)
+
+--[unscaled][freedreno/freedreno-tiling.png]
+<big>Freedreno: Tiling/GMEM</big>
+
+TODO
+
+-- [freedreno/xonotic.png]
+<big>Freedreno: a2xx ISA</big>
+
+TODO
+
+<span font="monospace 24px">
+ EXEC ADDR(0x3) CNT(0x4)
+      FETCH: VERTEX R1.xyzw = R0.x FMT_1_REVERSE UNSIGNED 
+			NORMALIZED STRIDE(0) CONST(1, 1)
+   (S)ALU:   MULv	R0 = R1.wwww, C3
+      ALU:   MULADDv	R0 = R0, R1.zzzz, C2
+      ALU:   MULADDv	R0 = R0, R1.yyyy, C1
+ ALLOC POSITION SIZE(0x0)
+ EXEC ADDR(0x7) CNT(0x1)
+      ALU:   MULADDv	export62 = R0, R1.xxxx, C0  ; gl_Position
+ ALLOC PARAM/PIXEL SIZE(0x0)
+ EXEC_END ADDR(0x8) CNT(0x0)
+ NOP
+</span>
+
+-- [freedreno/xonotic.png]
+<big>Freedreno: a3xx ISA</big>
+
+TODO
+
+<span font="monospace 24px">
+ ; gl_FragColor.x = dot(v1, v2);
+ mul.f hr0.x, hr0.x, hr1.x
+ nop
+ mad.f16 hr0.x, hr0.y, hr1.y, hr0.x
+ nop
+ mad.f16 hr0.x, hr0.z, hr1.z, hr0.x
+ nop
+ mad f16 hr0.x, hr0.w, hr1.w, hr0.x
+ end
+
+ ; gl_FragColor = v1;
+ (rpt3)mov.f16f16 hr0.x, (r)hr1.x
+</span>
+
+-- [freedreno/xonotic.png]
+<big>Freedreno: Status</big>
+
+ • Main Developer: Rob Clark (robclark)
+
+ • IRC: #freedreno (freenode)
+
+ • Initial msm drm/kms driver in v3.12
+
+ • Working gallium driver
+   • mesa 9.2 and master (but use master)
+   • supports a2xx and a3xx
+   • supports either msm drm/kms or android kgsl/fbdev
+
+ • Xorg - xf86-video-freedreno
+   • uses z180 2d core on devices which have it
+   • work-in-progress (but issues) XA state tracker
+   • supports either msm drm/kms or android kgsl/fbdev
+
+ • Wayland/Weston support
+   • msm drm/kms only
+
+-- [freedreno/xonotic.png]
+<big>Freedreno: Status (cont)</big>
+
+ • Supported
+   • OpenGL 1.4 - on best-effort basis
+   • OpenGL ES 1.0/2.0
+   • Textures: 2D, cubemap, 3D (incl mipmap)
+
+ • TODO
+   • MSAA
+   • hw binning pass (game performance)
+   • compiler could be a lot better
+
+ • Known to be working
+   • gnome-shell, xbmc, xonotic, openarena, etc
+
+ • Working but minor issues
+   • etuxracer, supertuxkart (MSAA issue)
+
+-- [center]
+Questions?
+
+# https://blog.visucore.com/
+
